@@ -1,3 +1,7 @@
+# External Libraries
+libs/
+
+# Build artifacts
 *.bo
 *.ba
 *.o
