@@ -49,7 +49,7 @@ $(BUILD_DIR)/kernel.xo: kernel.xml package_kernel.tcl $(SCRIPTS_DIR)/gen_xo.tcl 
 		-tclargs $(BUILD_DIR)/kernel.xo kernel hw $(PLATFORM)
 
 # --- .xclbin (v++ link) ---
-xclbin: $(BUILD_DIR)/kernel.xclbin
+xclbin: xo $(BUILD_DIR)/kernel.xclbin
 
 $(BUILD_DIR)/kernel.xclbin: $(BUILD_DIR)/kernel.xo $(CONFIGDIR)/u50.cfg
 	v++ -l -t $(TARGET) --platform $(PLATFORM) \
