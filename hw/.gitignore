@@ -1,0 +1,30 @@
+# ============================================================
+# HW build artifacts
+# ============================================================
+
+# BSV compiler output (intermediate)
+**/obj/
+
+# Vivado temporaries
+**/.Xil/
+**/.ipcache/
+*.backup.jou
+*.jou
+*.log
+*.str
+vivado.cache/
+vivado.hw/
+vivado.runs/
+vivado.sim/
+vivado.ip_user_files/
+webtalk.*
+
+# v++ / Vitis build directory (everything under build/)
+build/
+
+# Legacy build dirs (from old structure)
+hw/
+
+# Misc
+*.pyc
+__pycache__/
