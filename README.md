@@ -132,13 +132,13 @@ sw/foo_host/
 | File | Role |
 |------|------|
 | `KernelTop.bsv` | Synthesize boundary. Instantiates the AXI-Lite controller, your logic module, and wires them. Module name **must** be `kernel`. Uses `ap_clk` / `ap_rst_n` as default clock/reset. |
-| `FooLogic.bsv` | Where the actual computation lives. Communicates with `KernelTop` through start/done handshake and register reads. |
-| `AxiLiteControllerFoo.bsv` | BVI import of `s_axi_control_foo.v`. Exposes `ap_start`, `ap_done`, `ap_idle`, `ap_ready` control signals and any user-defined scalar/address registers. |
-| `s_axi_control_foo.v` | Standard AXI4-Lite slave implementing the register map. Modify address offsets here to add fields; keep the `0x00`–`0x0C` control registers as-is for Vitis compatibility. |
+| `FooLogic.bsv` | Where the actual computation lives. |
+| `AxiLiteControllerFoo.bsv` | BVI import of `s_axi_control_foo.v`. Exposes register interface to BSV. |
+| `s_axi_control_foo.v` | Verilog AXI4-Lite slave implementing the register map. |
 | `kernel.xml` | Declares the kernel's ports, arguments, their sizes and offsets. Must match the register map in the Verilog slave. |
 | `package_kernel.tcl` | Collects generated Verilog from `obj/verilog/`, packages into a Vivado IP. Adjust `ipx::associate_bus_interfaces` if you add AXI-MM master ports. |
 | `Makefile` | Copy from an existing kernel; change `PROJECT`, `HOSTDIR`, and optionally `BSCFLAGS`/`MODULEPATH`. |
-| `sw/foo_host/main.cpp` | Uses XRT API (`xrt::device`, `xrt::kernel`, `xrt::ip`) to load the xclbin, write registers, launch the kernel, and read back results. |
+| `sw/foo_host/main.cpp` | XRT host application. Loads the xclbin and communicates with the kernel. |
 
 ### Quick start
 
