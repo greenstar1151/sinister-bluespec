@@ -208,10 +208,10 @@ int main(int argc, char** argv)
 	// --- Cycle counter report ---
 	uint64_t train_cycles = cyc_after_train - cyc_before_train;
 	uint64_t norm_cycles  = cyc_after_norm - cyc_before_norm;
-	std::printf("\nCycle counts (FPGA @ 256MHz):\n");
-	std::printf("  Training:      %lu cycles (%.3f ms)\n", train_cycles, train_cycles / 256000.0);
-	std::printf("  Normalization: %lu cycles (%.3f ms)\n", norm_cycles, norm_cycles / 256000.0);
-	std::printf("  Total:         %lu cycles (%.3f ms)\n", train_cycles + norm_cycles, (train_cycles + norm_cycles) / 256000.0);
+	std::printf("\nCycle counts (FPGA @ 250MHz):\n");
+	std::printf("  Training:      %lu cycles (%.3f ms)\n", train_cycles, train_cycles / 250000.0);
+	std::printf("  Normalization: %lu cycles (%.3f ms)\n", norm_cycles, norm_cycles / 250000.0);
+	std::printf("  Total:         %lu cycles (%.3f ms)\n", train_cycles + norm_cycles, (train_cycles + norm_cycles) / 250000.0);
 
 	// --- Read base probabilities ---
 	std::printf("\nBase probabilities (Q16.16 -> double):\n");

@@ -233,8 +233,8 @@ int main(int argc, char** argv)
 	uint64_t total_cycles = cyc_after - cyc_before;
 
 	std::printf("After completion: status=%u, total_bases=%u\n", status, total);
-	std::printf("\nPerformance (FPGA @ 256MHz):\n");
-	std::printf("  Total (host-side): %lu cycles (%.3f ms)\n", total_cycles, total_cycles / 256000.0);
+	std::printf("\nPerformance (FPGA @ 250MHz):\n");
+	std::printf("  Total (host-side): %lu cycles (%.3f ms)\n", total_cycles, total_cycles / 250000.0);
 	std::printf("  Per base (host):   %.1f cycles\n", static_cast<double>(total_cycles) / packed);
 
 	// Internal perf counters (jitter-free)
@@ -247,9 +247,9 @@ int main(int argc, char** argv)
 	uint64_t perf_read  = read_perf(reg::PERF_READ_LO, reg::PERF_READ_HI);
 	uint64_t perf_norm  = read_perf(reg::PERF_NORM_LO, reg::PERF_NORM_HI);
 	std::printf("\nInternal perf counters (exact):\n");
-	std::printf("  Total:       %lu cycles (%.3f ms)\n", perf_total, perf_total / 256000.0);
-	std::printf("  Read+Train:  %lu cycles (%.3f ms)\n", perf_read, perf_read / 256000.0);
-	std::printf("  Normalize:   %lu cycles (%.3f ms)\n", perf_norm, perf_norm / 256000.0);
+	std::printf("  Total:       %lu cycles (%.3f ms)\n", perf_total, perf_total / 250000.0);
+	std::printf("  Read+Train:  %lu cycles (%.3f ms)\n", perf_read, perf_read / 250000.0);
+	std::printf("  Normalize:   %lu cycles (%.3f ms)\n", perf_norm, perf_norm / 250000.0);
 	std::printf("  Per base:    %.1f cycles\n", static_cast<double>(perf_read) / packed);
 
 	// --- Compare with golden model ---
