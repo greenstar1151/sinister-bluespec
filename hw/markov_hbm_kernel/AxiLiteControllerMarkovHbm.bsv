@@ -91,6 +91,20 @@ interface AxiLiteMarkovHbmIfc#(numeric type addrSz, numeric type dataSz);
 	method Bool     trans_prob_ren;
 	(* always_ready, prefix = "" *)
 	method Action   drive_trans_prob_rdata(Bit#(32) value);
+
+	// Internal performance counters (jitter-free)
+	(* always_ready, prefix = "" *)
+	method Action drive_perf_total_lo(Bit#(32) value);
+	(* always_ready, prefix = "" *)
+	method Action drive_perf_total_hi(Bit#(32) value);
+	(* always_ready, prefix = "" *)
+	method Action drive_perf_read_lo(Bit#(32) value);
+	(* always_ready, prefix = "" *)
+	method Action drive_perf_read_hi(Bit#(32) value);
+	(* always_ready, prefix = "" *)
+	method Action drive_perf_norm_lo(Bit#(32) value);
+	(* always_ready, prefix = "" *)
+	method Action drive_perf_norm_hi(Bit#(32) value);
 endinterface
 
 // ============================================================
@@ -154,6 +168,13 @@ module mkAxiLiteControllerMarkovHbm#(Clock aclk, Reset arst) (AxiLiteMarkovHbmIf
 	method trans_prob_ren trans_prob_ren() clocked_by(aclk) reset_by(arst);
 	method drive_trans_prob_rdata(trans_prob_rdata) enable((* inhigh *) drive_trans_prob_rdata_en) clocked_by(aclk) reset_by(arst);
 
+	method drive_perf_total_lo(perf_total_lo) enable((* inhigh *) drive_perf_total_lo_en) clocked_by(aclk) reset_by(arst);
+	method drive_perf_total_hi(perf_total_hi) enable((* inhigh *) drive_perf_total_hi_en) clocked_by(aclk) reset_by(arst);
+	method drive_perf_read_lo(perf_read_lo) enable((* inhigh *) drive_perf_read_lo_en) clocked_by(aclk) reset_by(arst);
+	method drive_perf_read_hi(perf_read_hi) enable((* inhigh *) drive_perf_read_hi_en) clocked_by(aclk) reset_by(arst);
+	method drive_perf_norm_lo(perf_norm_lo) enable((* inhigh *) drive_perf_norm_lo_en) clocked_by(aclk) reset_by(arst);
+	method drive_perf_norm_hi(perf_norm_hi) enable((* inhigh *) drive_perf_norm_hi_en) clocked_by(aclk) reset_by(arst);
+
 	schedule (
 		pins_write_address, pins_write_address_valid, pins_awready,
 		pins_write_data, pins_write_data_valid, pins_write_data_strb, pins_wready,
@@ -166,7 +187,10 @@ module mkAxiLiteControllerMarkovHbm#(Clock aclk, Reset arst) (AxiLiteMarkovHbmIf
 		drive_status, drive_total_bases, drive_magic,
 		drive_cycle_lo, drive_cycle_hi,
 		drive_base_prob_0, drive_base_prob_1, drive_base_prob_2, drive_base_prob_3,
-		trans_prob_raddr, trans_prob_ren, drive_trans_prob_rdata
+		trans_prob_raddr, trans_prob_ren, drive_trans_prob_rdata,
+		drive_perf_total_lo, drive_perf_total_hi,
+		drive_perf_read_lo, drive_perf_read_hi,
+		drive_perf_norm_lo, drive_perf_norm_hi
 	) CF (
 		pins_write_address, pins_write_address_valid, pins_awready,
 		pins_write_data, pins_write_data_valid, pins_write_data_strb, pins_wready,
@@ -179,7 +203,10 @@ module mkAxiLiteControllerMarkovHbm#(Clock aclk, Reset arst) (AxiLiteMarkovHbmIf
 		drive_status, drive_total_bases, drive_magic,
 		drive_cycle_lo, drive_cycle_hi,
 		drive_base_prob_0, drive_base_prob_1, drive_base_prob_2, drive_base_prob_3,
-		trans_prob_raddr, trans_prob_ren, drive_trans_prob_rdata
+		trans_prob_raddr, trans_prob_ren, drive_trans_prob_rdata,
+		drive_perf_total_lo, drive_perf_total_hi,
+		drive_perf_read_lo, drive_perf_read_hi,
+		drive_perf_norm_lo, drive_perf_norm_hi
 	);
 endmodule
 

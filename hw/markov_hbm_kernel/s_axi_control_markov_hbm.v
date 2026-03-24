@@ -62,7 +62,15 @@ module s_axi_control_markov_hbm #(
     // Transition probability read interface (256 values via indexed access)
     output wire [7:0]                    trans_prob_raddr,
     output wire                          trans_prob_ren,
-    input  wire [31:0]                   trans_prob_rdata
+    input  wire [31:0]                   trans_prob_rdata,
+
+    // Internal performance counters (from BSV, jitter-free)
+    input  wire [31:0]                   perf_total_lo,
+    input  wire [31:0]                   perf_total_hi,
+    input  wire [31:0]                   perf_read_lo,
+    input  wire [31:0]                   perf_read_hi,
+    input  wire [31:0]                   perf_norm_lo,
+    input  wire [31:0]                   perf_norm_hi
 );
 
 // ============================================================
@@ -77,6 +85,12 @@ module s_axi_control_markov_hbm #(
 // 0x018: DNA_PTR_LO   (W)  — HBM address low 32 bits
 // 0x01C: DNA_PTR_HI   (W)  — HBM address high 32 bits
 // 0x020: NUM_ENTRIES   (W)  — number of DNA entries (bytes) to read
+// 0x024: PERF_TOTAL_LO (R)  — internal perf: start→done total cycles (lo)
+// 0x028: PERF_TOTAL_HI (R)  — internal perf: start→done total cycles (hi)
+// 0x02C: PERF_READ_LO  (R)  — internal perf: HBM read+training cycles (lo)
+// 0x030: PERF_READ_HI  (R)  — internal perf: HBM read+training cycles (hi)
+// 0x034: PERF_NORM_LO  (R)  — internal perf: normalization cycles (lo)
+// 0x038: PERF_NORM_HI  (R)  — internal perf: normalization cycles (hi)
 // 0x100: BASE_PROB[0..3] (R)  Q16.16
 // 0x200-0x5FC: TRANS_PROB[0..255] (R) Q16.16
 
@@ -248,6 +262,12 @@ always @(posedge ACLK) begin
             12'h018: rdata_reg <= int_dna_ptr_lo;
             12'h01C: rdata_reg <= int_dna_ptr_hi;
             12'h020: rdata_reg <= int_num_entries;
+            12'h024: rdata_reg <= perf_total_lo;
+            12'h028: rdata_reg <= perf_total_hi;
+            12'h02C: rdata_reg <= perf_read_lo;
+            12'h030: rdata_reg <= perf_read_hi;
+            12'h034: rdata_reg <= perf_norm_lo;
+            12'h038: rdata_reg <= perf_norm_hi;
             12'h100: rdata_reg <= base_prob_0;
             12'h104: rdata_reg <= base_prob_1;
             12'h108: rdata_reg <= base_prob_2;

@@ -49,6 +49,26 @@ module kernel(KernelTopIfc);
 	// --- Top-level state ---
 	Reg#(TopState) topState <- mkReg(TOP_IDLE);
 
+	// --- Internal performance counters (jitter-free) ---
+	Reg#(UInt#(64)) perfTotal <- mkReg(0);      // start → done
+	Reg#(UInt#(64)) perfRead  <- mkReg(0);      // start → normalize begin
+	Reg#(UInt#(64)) perfNorm  <- mkReg(0);      // normalize begin → done
+	Reg#(Bool) perfRunning <- mkReg(False);      // total counter active
+	Reg#(Bool) perfReadPhase <- mkReg(False);    // read+train phase active
+	Reg#(Bool) perfNormPhase <- mkReg(False);    // normalize phase active
+
+	rule countPerfTotal(perfRunning);
+		perfTotal <= perfTotal + 1;
+	endrule
+
+	rule countPerfRead(perfReadPhase);
+		perfRead <= perfRead + 1;
+	endrule
+
+	rule countPerfNorm(perfNormPhase);
+		perfNorm <= perfNorm + 1;
+	endrule
+
 	// --- HBM reader state ---
 	// Counts remaining 512-bit words to fetch from the AXI read response
 	Reg#(Bit#(512)) wordBuf <- mkReg(0);
@@ -68,6 +88,9 @@ module kernel(KernelTopIfc);
 			entriesLeft <= 0;
 			readReqSent <= False;
 			triggerNormalize <= False;
+			perfRunning <= False;
+			perfReadPhase <= False;
+			perfNormPhase <= False;
 			trainer.putCommand(32'h01); // reset trainer
 		end else if (cmd == cmdStart && topState == TOP_IDLE) begin
 			// Read HBM pointer and entry count from AXI-Lite registers
@@ -85,6 +108,13 @@ module kernel(KernelTopIfc);
 			readReqSent <= True;
 			bytesInBuf <= 0;
 			topState <= TOP_READING;
+			// Start perf counters
+			perfTotal <= 0;
+			perfRead  <= 0;
+			perfNorm  <= 0;
+			perfRunning <= True;
+			perfReadPhase <= True;
+			perfNormPhase <= False;
 		end
 	endrule
 
@@ -125,6 +155,9 @@ module kernel(KernelTopIfc);
 		trainer.putCommand(32'h02); // CMD_NORMALIZE
 		triggerNormalize <= False;
 		topState <= TOP_NORMALIZING;
+		// Switch perf phase: read→norm
+		perfReadPhase <= False;
+		perfNormPhase <= True;
 	endrule
 
 	// Watch for trainer to finish normalizing
@@ -132,6 +165,9 @@ module kernel(KernelTopIfc);
 		// MarkovTrainer status: 3 = ST_DONE
 		if (trainer.getStatus == 32'h03) begin
 			topState <= TOP_DONE;
+			// Stop all perf counters
+			perfRunning <= False;
+			perfNormPhase <= False;
 		end
 	endrule
 
@@ -144,6 +180,15 @@ module kernel(KernelTopIfc);
 		axiControl.drive_magic(trainer.getMagic);
 		axiControl.drive_cycle_lo(trainer.getCycleLo);
 		axiControl.drive_cycle_hi(trainer.getCycleHi);
+	endrule
+
+	rule drivePerfRegs;
+		axiControl.drive_perf_total_lo(pack(perfTotal)[31:0]);
+		axiControl.drive_perf_total_hi(pack(perfTotal)[63:32]);
+		axiControl.drive_perf_read_lo(pack(perfRead)[31:0]);
+		axiControl.drive_perf_read_hi(pack(perfRead)[63:32]);
+		axiControl.drive_perf_norm_lo(pack(perfNorm)[31:0]);
+		axiControl.drive_perf_norm_hi(pack(perfNorm)[63:32]);
 	endrule
 
 	rule driveBaseProbs;

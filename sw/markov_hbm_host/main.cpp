@@ -23,6 +23,12 @@ constexpr uint32_t CYCLE_HI     = 0x014;
 constexpr uint32_t DNA_PTR_LO   = 0x018;
 constexpr uint32_t DNA_PTR_HI   = 0x01C;
 constexpr uint32_t NUM_ENTRIES  = 0x020;
+constexpr uint32_t PERF_TOTAL_LO = 0x024;
+constexpr uint32_t PERF_TOTAL_HI = 0x028;
+constexpr uint32_t PERF_READ_LO  = 0x02C;
+constexpr uint32_t PERF_READ_HI  = 0x030;
+constexpr uint32_t PERF_NORM_LO  = 0x034;
+constexpr uint32_t PERF_NORM_HI  = 0x038;
 constexpr uint32_t BASE_PROB    = 0x100; // +0,4,8,C for A,C,G,T
 constexpr uint32_t TRANS_PROB   = 0x200; // +index*4, index=ctx*4+base
 
@@ -228,8 +234,23 @@ int main(int argc, char** argv)
 
 	std::printf("After completion: status=%u, total_bases=%u\n", status, total);
 	std::printf("\nPerformance (FPGA @ 256MHz):\n");
-	std::printf("  Total:  %lu cycles (%.3f ms)\n", total_cycles, total_cycles / 256000.0);
-	std::printf("  Per base: %.1f cycles\n", static_cast<double>(total_cycles) / packed);
+	std::printf("  Total (host-side): %lu cycles (%.3f ms)\n", total_cycles, total_cycles / 256000.0);
+	std::printf("  Per base (host):   %.1f cycles\n", static_cast<double>(total_cycles) / packed);
+
+	// Internal perf counters (jitter-free)
+	auto read_perf = [&](uint32_t lo_reg, uint32_t hi_reg) -> uint64_t {
+		uint32_t lo = ip.read_register(lo_reg);
+		uint32_t hi = ip.read_register(hi_reg);
+		return (static_cast<uint64_t>(hi) << 32) | lo;
+	};
+	uint64_t perf_total = read_perf(reg::PERF_TOTAL_LO, reg::PERF_TOTAL_HI);
+	uint64_t perf_read  = read_perf(reg::PERF_READ_LO, reg::PERF_READ_HI);
+	uint64_t perf_norm  = read_perf(reg::PERF_NORM_LO, reg::PERF_NORM_HI);
+	std::printf("\nInternal perf counters (exact):\n");
+	std::printf("  Total:       %lu cycles (%.3f ms)\n", perf_total, perf_total / 256000.0);
+	std::printf("  Read+Train:  %lu cycles (%.3f ms)\n", perf_read, perf_read / 256000.0);
+	std::printf("  Normalize:   %lu cycles (%.3f ms)\n", perf_norm, perf_norm / 256000.0);
+	std::printf("  Per base:    %.1f cycles\n", static_cast<double>(perf_read) / packed);
 
 	// --- Compare with golden model ---
 	MarkovGolden golden;
